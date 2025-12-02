@@ -37,6 +37,7 @@ with builtins; let
     escape = list: replaceStrings list (map (c: "\\${c}") list);
     addContextFrom = src: target: substring 0 0 src + target;
     escapeRegex = escape (stringToCharacters "\\[{()^$?*+|.");
+    escapeNixString = s: escape [ "$" ] (toJSON s);
     splitString =
     sep: s:
     let
@@ -65,29 +66,23 @@ with builtins; let
       else
         count
     );
-    double = n:
+    concatStrings = concatStringsSep "";
+    replicate = n: elem: genList (_: elem) n;
+    repeated = l:
     let
-        s = stringToCharacters (toString n);
-        jinx = div (length s) 2;
-    in
-        rem (length s) 2 == 0 && take jinx s == drop jinx s;
-        #n:
-        #let
-        #    f = a: b: if a == b then
-        #        true else if b > a then
-        #        false else
-        #        f (div a 10) (b * 10 + rem a 10);
-        #in
-        #    if rem (digits n) 2 == 0 then
-        #        f n 0
-        #    else false;
+	len = length l;
+        jinx = div len 2;
+	tries = map (n: { l'=l; p=take (n) l; }) (range 1 jinx);
+	repeated' = set: with set; (length l' == 0 || (if take (length p) l' == p then (if l' == p then true else repeated' { l'=drop (length p) l'; p=p; }) else false));
+    	out = any repeated' tries;
+    in out;
     range = start: end: map (add (start - 1)) (genList (add 1) (end - start + 1));
     viktor = x: deepSeq x x;
     dbg = x: trace x x;
     dbg' = x: dbg (viktor x);
     jayce = s: x: trace (deepSeq s s) x;
-    faulty = r: foldl' (acc: x: add acc x) 0 (map (x: if double x then x else 0) r);
+    toChars = n: stringToCharacters (toString n);
+    faulty = r: foldl' (acc: x: add acc x) 0 (map (x: if repeated (toChars x) then x else 0) r);
     parseId = s: let l = splitString "-" s; from = toInt (head l); to = toInt (head (tail l)); in range from to;
     sum = foldl' add 0;
-in sum (map (faulty) ranges)
-
+in sum (map faulty ranges)
