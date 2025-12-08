@@ -17,7 +17,12 @@ rec {
                         row  = elemAt grid.content pos.row;
                         row' = changeList row pos.col value;
                 in
-                        changeList grid.content pos.row row';
+                        {
+                                content = changeList grid.content pos.row row';
+                                inherit (grid) width height;
+                        };
+        showGrid = grid:
+                map concatStrings grid.content;
         adjacentPosList = grid: pos:
                 let
                         posList = posRange
@@ -46,17 +51,75 @@ rec {
         posRange = startRow: endRow: startCol: endCol:
                 let
                         colIds = lists.range startCol endCol;
-                        rowIds = lists.range startRow endRow;
+                        rowIds = if endRow - startRow > 3 && endRow - startRow < 100 then lists.range (startRow + 1) (endRow - 1) else lists.range startRow endRow;
                         col = colId: map (rowId: { col=colId; row=rowId; }) rowIds;
                         raw = map col colIds;
                 in
                         lists.concatMap (x: x) raw;
         entirePosList = grid: posRange 0 (grid.height - 1) 0 (grid.width - 1);
-        accessable = grid:
+        accessablePosList = grid:
                 let
                         predicate = pos:
                                 posIsRoll grid pos &&
                                 adjacentRolls grid pos < 4;
                 in
-                        count predicate (entirePosList grid);
+                        filter predicate (entirePosList grid);
+        removeRolls = grid: posList:
+                if posList == [] then
+                        grid
+                else
+                        let
+                                newGrid = changeGrid grid (head posList) ".";
+                        in
+                                removeRolls newGrid (tail posList);
+        step = grid:
+                let 
+                        accessableRollsPos = accessablePosList grid;
+                        newGrid = removeRolls grid accessableRollsPos;
+                        rolls = length accessableRollsPos;
+                in 
+                        { inherit rolls; newGrid = (jayce (showGrid newGrid) newGrid); };
+        stepPartitioned = grid:
+                let
+                        first = partitionGrid grid 0 69;
+                        second = partitionGrid grid 70 137;
+                        first' = step first;
+                        second' = step second;
+                        residual' = step (concatGridPartitions first'.newGrid second'.newGrid);
+                in
+                        {
+                                rolls = first'.rolls + second'.rolls + residual'.rolls;
+                                newGrid = residual'.newGrid;
+                        };
+        concatGridPartitions = partition1: partition2:
+                rec {
+                        content = partition1.content ++ partition2.content;
+                        width = partition1.width;
+                        height = partition1.height + partition2.height;
+                };
+        partitionGrid = grid: startRow: endRow:
+                rec {
+                        content = lists.sublist
+                                startRow
+                                height
+                                grid.content;
+                        width = grid.width;
+                        height = 1 + endRow - startRow;
+                };
+        allRolls = grid:
+                let
+                        next = step grid;
+                in
+                        if next.rolls == 0 then
+                                0
+                        else
+                                next.rolls + allRolls next.newGrid;
+        allRollsPartitioned = grid:
+                let
+                        next = stepPartitioned grid;
+                in
+                        if next.rolls == 0 then
+                                0
+                        else
+                                next.rolls + allRollsPartitioned next.newGrid;
 }
