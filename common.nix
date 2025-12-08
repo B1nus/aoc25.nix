@@ -1,7 +1,7 @@
 with builtins; with import <nixpkgs/lib>; rec {
         lines = strings.splitString "\n";
         readInput = path: strings.trim (readFile path);
-        asList = f: l:
+        stringAsList = f: l:
                 let
                         out = f (strings.stringToCharacters l);
                 in
