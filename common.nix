@@ -24,6 +24,13 @@ rec {
                 if r < 0 then r + b else r;
         boolToInt = b: if b then 1 else 0;
         abs = x: if x < 0 then - x else x;
+        nub = l:
+                if l == [] then
+                        []
+                else if elem (head l) (tail l) then
+                        nub (tail l)
+                else
+                        [ (head l) ] ++ nub (tail l);
         jayce = stderr: out:
                 deepSeq stderr (trace stderr out);
         jinx = out:
