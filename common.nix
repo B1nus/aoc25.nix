@@ -1,5 +1,7 @@
 with builtins; with import <nixpkgs/lib>; rec {
         lines = strings.splitString "\n";
+        # comp = l: x: if length l == 0 then x else comp (tail l) ((head l) x);
+        # This was a bad idea
         readInput = path: strings.trim (readFile path);
         stringAsList = f: l:
                 let
