@@ -12,10 +12,9 @@ with builtins; with import <nixpkgs/lib>; rec {
                         else
                                 out;
         changeList = l: i: x:
-                if i == 0 then
-                        [ x ] ++ tail l
-                else 
-                        [ (head l) ] ++ changeList (tail l) (i - 1) x;
+                lists.sublist 0 i l ++
+                [ x ] ++
+                lists.sublist (i + 1) (length l - i - 1) l;
         rem = a: b: a - div a b * b;
         mod = a: b: let
                 r = rem a b;
@@ -23,4 +22,8 @@ with builtins; with import <nixpkgs/lib>; rec {
                 if r < 0 then r + b else r;
         boolToInt = b: if b then 1 else 0;
         abs = x: if x < 0 then - x else x;
+        jayce = stderr: out:
+                deepSeq stderr (trace stderr out);
+        jinx = out:
+                jayce out out;
 }
