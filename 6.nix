@@ -6,7 +6,12 @@ rec {
         inputLines = lines inputText;
         numberLines = dropEnd 1 inputLines;
         operatorLine = last inputLines;
-        numbers = map (line: map toInt (words line)) numberLines;
+        safeToInt = s: if s == "" then null else toInt s;
+        numbers = splitList
+                isNull
+                (map
+                        (compose [ concatStrings trim safeToInt ])
+                        (transpose (map stringToCharacters numberLines)));
         operators = words operatorLine;
         fold = operator:
                 if operator == "*" then
@@ -14,14 +19,5 @@ rec {
                 else
                         foldl' add 0;
         bigFold = numbers: operators:
-                if operators == [] then
-                        0
-                else
-                        let
-                                headNums = map head numbers;
-                                operator = head operators;
-                                tailNumbers = map tail numbers;
-                                tailOperators = tail operators;
-                        in
-                                fold operator headNums + bigFold tailNumbers tailOperators;
+                foldl' (acc: x: acc + fold x.snd x.fst) 0 (zipLists numbers operators);
 }

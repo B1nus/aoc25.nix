@@ -2,6 +2,38 @@ with builtins;
 with import <nixpkgs/lib>;
 rec {
         lines = splitString "\n";
+        halfList = predicate: xs:
+                if xs == [] then
+                        {
+                                left = [];
+                                right = [];
+                        }
+                else if predicate (head xs) then
+                        {
+                                left = [];
+                                right = tail xs;
+                        }
+                else with halfList predicate (tail xs);
+                        {
+                                left = append (head xs) left;
+                                right = right;
+                        };
+        splitList = predicate: xs:
+                if xs == [] then
+                        []
+                else with halfList predicate xs;
+                        (append (toList left) (splitList predicate right));
+        transpose = lss:
+                if lss == [] || head lss == [] then
+                        []
+                else
+                        let
+                                heads = map head lss;
+                                tails = map tail lss;
+                        in
+                                append heads (transpose tails);
+        append = x: l: [ x ] ++ l;
+        postpend = x: l: l ++ [ x ];
         compose = functions: argument:
                 if functions == [] then
                         argument
