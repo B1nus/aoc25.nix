@@ -3,7 +3,7 @@ let
         input = readInput ./1.txt;
         items = map parseRotation (lines input);
         parseRotation = s:
-                toInt (stringAsList tail s) * (if stringAsList head s == "R" then
+                toInt (strings.substring 1 (stringLength s - 1) s) * (if strings.substring 0 1 s == "R" then
                         1
                 else
                         -1);

@@ -1,20 +1,7 @@
 with builtins; with import <nixpkgs/lib>; rec {
         lines = strings.splitString "\n";
-        # comp = l: x: if length l == 0 then x else comp (tail l) ((head l) x);
-        # This was a bad idea
         readInput = path: strings.trim (readFile path);
-        stringAsList = f: l:
-                let
-                        out = f (strings.stringToCharacters l);
-                in
-                        if isList out && isString (head out) then
-                                strings.concatStrings out
-                        else
-                                out;
-        changeList = l: i: x:
-                lists.sublist 0 i l ++
-                [ x ] ++
-                lists.sublist (i + 1) (length l - i - 1) l;
+        changeList = l: i: x: lists.take i l ++ [ x ] ++ lists.drop (i + 1) l;
         rem = a: b: a - div a b * b;
         mod = a: b: let
                 r = rem a b;
