@@ -1,7 +1,7 @@
 with builtins;
 with import <nixpkgs/lib>;
 rec {
-        lines = strings.splitString "\n";
+        lines = splitString "\n";
         compose = functions: argument:
                 if functions == [] then
                         argument
@@ -15,6 +15,7 @@ rec {
                         left = head parts;
                         right = elemAt parts 1;
                 };
+        words = compose [ (splitString " ") (filter (s: stringLength s > 0)) ];
         readInput = path: strings.trim (readFile path);
         changeList = l: i: x: lists.take i l ++ [ x ] ++ lists.drop (i + 1) l;
         rem = a: b: a - div a b * b;
