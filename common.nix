@@ -24,6 +24,7 @@ rec {
                 if r < 0 then r + b else r;
         boolToInt = b: if b then 1 else 0;
         abs = x: if x < 0 then - x else x;
+        sum = foldl' add 0;
         nub = l:
                 if l == [] then
                         []
