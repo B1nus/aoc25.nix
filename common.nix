@@ -18,6 +18,27 @@ rec {
                                 left = append (head xs) left;
                                 right = right;
                         };
+        read2dString = compose [ lines (map (stringToCharacters)) ];
+        newGrid = content:
+                let
+                        height = length content;
+                        width = length (head content);
+                in
+                        { inherit content width height; };
+        newPos = row: col:
+                { inherit row col; };
+        elemAt2d = ll: pos:
+                elemAt (elemAt ll pos.row) pos.col;
+        elemAtGrid = grid: pos:
+                if isInGridBounds grid pos then
+                        elemAt2d grid.content pos
+                else
+                        null;
+        isInGridBounds = grid: pos:
+                pos.row >= 0 &&
+                pos.col >= 0 &&
+                pos.row < grid.height &&
+                pos.col < grid.width;
         splitList = predicate: xs:
                 if xs == [] then
                         []

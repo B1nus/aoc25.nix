@@ -3,16 +3,7 @@ with import <nixpkgs/lib>;
 with builtins;
 with strings;
 rec {
-        grid =
-                stringToGrid (readInput ./4.txt);
-        stringToGrid = s:
-                newGrid (map stringToCharacters (lines s));
-        newGrid = content:
-                let
-                        height = length content;
-                        width = length (head content);
-                in
-                        { inherit content width height; };
+        grid = compose [ readInput read2dString newGrid ] ./4.txt;
         cellAtPos = grid: pos:
                 elemAt (elemAt grid.content pos.row) pos.col;
         changeGrid = grid: pos: value:
@@ -26,11 +17,7 @@ rec {
                                 (pos.row + 1)
                                 (pos.col - 1)
                                 (pos.col + 1);
-                        inBounds = pos':
-                                pos'.row >= 0 &&
-                                pos'.row < grid.height &&
-                                pos'.col >= 0 &&
-                                pos'.col < grid.width;
+                        inBounds = isInGridBounds grid;
                         predicate = pos':
                                 inBounds pos' &&
                                 inBounds pos &&
@@ -74,7 +61,7 @@ rec {
                         newGrid = removeRolls grid accessableRollsPos;
                         rolls = length accessableRollsPos;
                 in 
-                        { inherit rolls; newGrid = (jayce (showGrid newGrid) newGrid); };
+                        { inherit rolls; newGrid = newGrid; };
         stepPartitioned = grid:
                 let
                         first = partitionGrid grid 0 69;
