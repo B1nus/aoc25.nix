@@ -50,6 +50,7 @@ rec {
         words = compose [ (splitString " ") (filter (s: stringLength s > 0)) ];
         readInput = path: strings.trim (readFile path);
         changeList = l: i: x: lists.take i l ++ [ x ] ++ lists.drop (i + 1) l;
+        change2dList = ll: r: c: x: changeList ll r (changeList (elemAt ll r) c x);
         rem = a: b: a - div a b * b;
         mod = a: b: let
                 r = rem a b;

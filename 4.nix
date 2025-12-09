@@ -3,24 +3,20 @@ with import <nixpkgs/lib>;
 with builtins;
 with strings;
 rec {
-        grid = stringToGrid (readInput ./4.txt);
+        grid =
+                stringToGrid (readInput ./4.txt);
         stringToGrid = s:
+                newGrid (map stringToCharacters (lines s));
+        newGrid = content:
                 let
-                        content = map stringToCharacters (lines s);
                         height = length content;
                         width = length (head content);
                 in
                         { inherit content width height; };
-        cellAtPos = grid: pos: elemAt (elemAt grid.content pos.row) pos.col;
+        cellAtPos = grid: pos:
+                elemAt (elemAt grid.content pos.row) pos.col;
         changeGrid = grid: pos: value:
-                let
-                        row  = elemAt grid.content pos.row;
-                        row' = changeList row pos.col value;
-                in
-                        {
-                                content = changeList grid.content pos.row row';
-                                inherit (grid) width height;
-                        };
+                newGrid (change2dList grid.content pos.row pos.col value);
         showGrid = grid:
                 map concatStrings grid.content;
         adjacentPosList = grid: pos:
