@@ -19,6 +19,9 @@ rec {
                                 right = right;
                         };
         read2dString = compose [ lines (map (stringToCharacters)) ];
+        range = left: right: if right < left then error "nah fam" else { inherit left right; };
+        rangesOverlapWithAtLeast = x: r1: r2: !(r1.right < r2.left + x || r1.left > r2.right - x);
+        rangesOverlap = rangesOverlapWithAtLeast 0;
         newGrid = content:
                 let
                         height = length content;
@@ -80,6 +83,8 @@ rec {
         boolToInt = b: if b then 1 else 0;
         abs = x: if x < 0 then - x else x;
         sum = foldl' add 0;
+        foldl1 = f: xs: foldl f (head xs) xs;
+        maximum = foldl1 max;
         nub = l:
                 if l == [] then
                         []
