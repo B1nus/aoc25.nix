@@ -1,6 +1,7 @@
 with builtins;
 with import <nixpkgs/lib>;
 rec {
+        zipWithIndex = list: zipWith (i: x: { inherit i x; }) (genList (x: x) (length list)) list;
         lines = splitString "\n";
         halfList = predicate: xs:
                 if xs == [] then
@@ -19,7 +20,7 @@ rec {
                                 right = right;
                         };
         read2dString = compose [ lines (map (stringToCharacters)) ];
-        range = left: right: if right < left then error "nah fam" else { inherit left right; };
+        #range = left: right: if right < left then error "nah fam" else { inherit left right; };
         rangesOverlapWithAtLeast = x: r1: r2: !(r1.right < r2.left + x || r1.left > r2.right - x);
         rangesOverlap = rangesOverlapWithAtLeast 0;
         newGrid = content:
@@ -69,7 +70,7 @@ rec {
                 in
                         {
                         left = head parts;
-                        right = elemAt parts 1;
+                        right = join sep (tail parts);
                 };
         words = compose [ (splitString " ") (filter (s: stringLength s > 0)) ];
         readInput = path: strings.trim (readFile path);
@@ -85,6 +86,7 @@ rec {
         sum = foldl' add 0;
         foldl1 = f: xs: foldl f (head xs) xs;
         maximum = foldl1 max;
+        minimum = foldl1 min;
         nub = l:
                 if l == [] then
                         []
